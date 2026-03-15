@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>DSA Algorithm Visualizer</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0f0e17;
+  --card: #1a1828;
+  --card2: #221f35;
+  --border: #2e2b4a;
+  --pink:   #ff6b9d;
+  --purple: #a855f7;
+  --blue:   #38bdf8;
+  --green:  #4ade80;
+  --yellow: #fbbf24;
+  --orange: #fb923c;
+  --red:    #f87171;
+  --teal:   #2dd4bf;
+  --text:   #e2e0f0;
+  --dim:    #6b6894;
+  --code-bg: #1a1828;
+  --code-text: #e2e0f0;
+}
+
+body.light {
+  --bg: #f0f4ff;
+  --card: #ffffff;
+  --card2: #f0f4ff;
+  --border: #c8d0e8;
+  --text: #1a1060;
+  --dim: #7a80a0;
+  --code-bg: #1e1e2e;
+  --code-text: #e2e0f0;
+}
+
+body.light::before {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(168,85,247,0.06) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(56,189,248,0.05) 0%, transparent 40%);
+}
+
+/* Theme toggle button */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 50px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  color: var(--text);
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.theme-toggle:hover { transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+
+/* Code section */
+.code-section {
+  margin-top: 24px;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 2px solid var(--border);
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.code-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.code-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.code-lang-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.code-lang-btn {
+  background: var(--card2);
+  border: 2px solid var(--border);
+  color: var(--dim);
+  font-family: 'Fredoka One', cursive;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.code-lang-btn.active { background: linear-gradient(135deg,var(--purple),var(--blue)); color:#fff; border-color:transparent; }
+
+.code-copy-btn {
+  background: var(--card2);
+  border: 2px solid var(--border);
+  color: var(--dim);
+  font-family: 'Fredoka One', cursive;
+  font-size: 12px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.code-copy-btn:hover { border-color: var(--green); color: var(--green); }
+
+pre.code-block {
+  background: var(--code-bg);
+  color: var(--code-text);
+  padding: 18px 20px;
+  font-family: 'Courier New', monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  overflow-x: auto;
+  margin: 0;
+  white-space: pre;
+}
+
+/* Syntax highlighting */
+.kw  { color: #ff79c6; font-weight: bold; }
+.fn  { color: #50fa7b; }
+.cm  { color: #6272a4; font-style: italic; }
+.st  { color: #f1fa8c; }
+.nm  { color: #bd93f9; }
+.op  { color: #ff6b9d; }
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  font-family: 'Nunito', sans-serif;
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Bubbly background */
+body::before {
+  content:'';
+  position:fixed; inset:0;
+  background:
+    radial-gradient(circle at 15% 20%, rgba(168,85,247,0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 80%, rgba(56,189,248,0.07) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(255,107,157,0.04) 0%, transparent 60%);
+  pointer-events:none; z-index:0;
+}
+
+.container { position:relative; z-index:1; max-width:1200px; margin:0 auto; padding:0 20px 60px; }
+
+/* ── HEADER ── */
+header {
+  padding: 28px 0 24px;
+  text-align: center;
+  border-bottom: 2px dashed var(--border);
+  margin-bottom: 32px;
+}
+
+.logo {
+  font-family: 'Fredoka One', cursive;
+  font-size: clamp(28px, 5vw, 48px);
+  background: linear-gradient(135deg, var(--pink), var(--purple), var(--blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 6px;
+  letter-spacing: 1px;
+}
+
+.tagline { font-size: 14px; color: var(--dim); letter-spacing: 1px; }
+
+/* ── CATEGORY TABS ── */
+.tabs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: 28px;
+}
+
+.tab {
+  background: var(--card);
+  border: 2px solid var(--border);
+  color: var(--dim);
+  font-family: 'Fredoka One', cursive;
+  font-size: 15px;
+  padding: 10px 22px;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.tab:hover { transform: translateY(-2px); }
+.tab.active { color: #000; border-color: transparent; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+.tab[data-cat="sorting"].active  { background: linear-gradient(135deg,var(--pink),var(--orange)); }
+.tab[data-cat="graph"].active    { background: linear-gradient(135deg,var(--blue),var(--teal)); }
+.tab[data-cat="linked"].active   { background: linear-gradient(135deg,var(--green),var(--teal)); }
+.tab[data-cat="stack"].active    { background: linear-gradient(135deg,var(--purple),var(--pink)); }
+.tab[data-cat="queue"].active    { background: linear-gradient(135deg,var(--yellow),var(--orange)); }
+.tab[data-cat="search"].active   { background: linear-gradient(135deg,var(--blue),var(--purple)); }
+
+/* ── MAIN LAYOUT ── */
+.main { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+@media(max-width:768px){ .main { grid-template-columns: 1fr; } }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  height: fit-content;
+  position: sticky;
+  top: 20px;
+}
+
+.sidebar-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  margin-bottom: 14px;
+  color: var(--text);
+}
+
+.algo-btn {
+  display: block;
+  width: 100%;
+  background: var(--card2);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-bottom: 8px;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.algo-btn:hover { transform: translateX(4px); border-color: var(--purple); }
+.algo-btn.active { border-color: var(--pink); background: rgba(255,107,157,0.1); color: var(--pink); }
+
+.complexity-box {
+  margin-top: 16px;
+  background: var(--card2);
+  border: 2px dashed var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 12px;
+}
+
+.complexity-box h4 { font-family:'Fredoka One',cursive; font-size:14px; margin-bottom:8px; color:var(--yellow); }
+.complexity-row { display:flex; justify-content:space-between; margin-bottom:4px; color:var(--dim); }
+.complexity-row span:last-child { color:var(--text); font-weight:700; }
+
+/* ── VISUALIZER PANEL ── */
+.panel {
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+.panel-header {
+  padding: 18px 24px;
+  border-bottom: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel-title {
+  font-family: 'Fredoka One', cursive;
+  font-size: 22px;
+  background: linear-gradient(135deg, var(--pink), var(--purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.panel-body { padding: 24px; }
+
+/* ── INPUT CONTROLS ── */
+.controls {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+input[type="text"], input[type="number"], select {
+  background: var(--card2);
+  border: 2px solid var(--border);
+  color: var(--text);
+  font-family: 'Nunito', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+input[type="text"]:focus, input[type="number"]:focus, select:focus {
+  border-color: var(--purple);
+}
+
+input[type="text"]::placeholder { color: var(--dim); }
+
+.btn {
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  padding: 10px 20px;
+  border-radius: 50px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+.btn-pink   { background: linear-gradient(135deg,var(--pink),var(--orange)); color:#000; }
+.btn-purple { background: linear-gradient(135deg,var(--purple),var(--blue)); color:#fff; }
+.btn-green  { background: linear-gradient(135deg,var(--green),var(--teal)); color:#000; }
+.btn-yellow { background: linear-gradient(135deg,var(--yellow),var(--orange)); color:#000; }
+.btn-gray   { background: var(--card2); border: 2px solid var(--border); color: var(--dim); }
+
+/* Speed slider */
+.speed-wrap { display:flex; align-items:center; gap:8px; font-size:12px; color:var(--dim); }
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 80px; height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  background: var(--purple);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* ── STEP MESSAGE ── */
+.step-msg {
+  background: var(--card2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 18px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+}
+
+.step-msg.compare { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,0.08); }
+.step-msg.swap    { border-color: var(--pink);   color: var(--pink);   background: rgba(255,107,157,0.08); }
+.step-msg.sorted  { border-color: var(--green);  color: var(--green);  background: rgba(74,222,128,0.08); }
+.step-msg.visit   { border-color: var(--blue);   color: var(--blue);   background: rgba(56,189,248,0.08); }
+.step-msg.found   { border-color: var(--green);  color: var(--green);  background: rgba(74,222,128,0.08); }
+.step-msg.error   { border-color: var(--red);    color: var(--red);    background: rgba(248,113,113,0.08); }
+
+/* ── SORTING BARS ── */
+#sort-canvas {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 220px;
+  padding: 10px 0;
+  justify-content: center;
+}
+
+.bar {
+  flex: 1;
+  max-width: 40px;
+  border-radius: 8px 8px 0 0;
+  transition: height 0.25s, background 0.25s;
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 4px;
+}
+
+.bar-label {
+  font-size: 10px;
+  font-weight: 800;
+  color: rgba(0,0,0,0.7);
+  position: absolute;
+  bottom: 4px;
+}
+
+.bar.default  { background: linear-gradient(180deg,var(--blue),var(--purple)); }
+.bar.compare  { background: linear-gradient(180deg,var(--yellow),var(--orange)); }
+.bar.swap     { background: linear-gradient(180deg,var(--pink),var(--red)); }
+.bar.sorted   { background: linear-gradient(180deg,var(--green),var(--teal)); }
+.bar.pivot    { background: linear-gradient(180deg,var(--orange),var(--yellow)); }
+
+/* ── GRAPH CANVAS ── */
+#graph-canvas {
+  width: 100%;
+  height: 320px;
+  background: var(--card2);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+.graph-node {
+  position: absolute;
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--card);
+  border: 3px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s;
+  z-index: 2;
+  transform: translate(-50%, -50%);
+}
+
+.graph-node.unvisited { border-color: var(--blue);   color: var(--blue); }
+.graph-node.visiting  { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,0.15); transform: translate(-50%,-50%) scale(1.2); }
+.graph-node.visited   { border-color: var(--green);  color: var(--green); background: rgba(74,222,128,0.15); }
+.graph-node.start     { border-color: var(--pink);   color: var(--pink);  background: rgba(255,107,157,0.15); }
+
+.graph-edge {
+  position: absolute;
+  background: var(--border);
+  height: 2px;
+  transform-origin: 0 50%;
+  z-index: 1;
+  transition: background 0.3s;
+}
+.graph-edge.active { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+.graph-edge.used   { background: var(--green); }
+
+/* ── LINKED LIST ── */
+#ll-canvas {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0;
+  min-height: 100px;
+  padding: 20px 0;
+}
+
+.ll-node {
+  display: flex;
+  align-items: center;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+.ll-box {
+  background: var(--card2);
+  border: 3px solid var(--blue);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  color: var(--blue);
+  min-width: 52px;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.ll-box.active   { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,0.1); transform: translateY(-6px); }
+.ll-box.found    { border-color: var(--green);  color: var(--green);  background: rgba(74,222,128,0.1); }
+.ll-box.deleted  { border-color: var(--red);    color: var(--red);    opacity: 0.4; }
+.ll-box.new-node { border-color: var(--pink);   color: var(--pink);   background: rgba(255,107,157,0.1); }
+
+.ll-arrow {
+  font-size: 20px;
+  color: var(--dim);
+  padding: 0 4px;
+}
+
+.ll-null {
+  font-family: 'Fredoka One', cursive;
+  font-size: 14px;
+  color: var(--red);
+  margin-left: 4px;
+}
+
+/* ── STACK ── */
+#stack-canvas {
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  min-height: 200px;
+  gap: 6px;
+  padding: 10px;
+  justify-content: flex-start;
+}
+
+.stack-item {
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  color: #fff;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  padding: 10px 32px;
+  border-radius: 10px;
+  width: 180px;
+  text-align: center;
+  animation: slideIn 0.3s ease;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.stack-item.top::after {
+  content: '← TOP';
+  position: absolute;
+  right: -56px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: var(--pink);
+  white-space: nowrap;
+}
+
+@keyframes slideIn {
+  from { transform: translateY(-20px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ── QUEUE ── */
+#queue-canvas {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 100px;
+  padding: 20px 0;
+  flex-wrap: wrap;
+}
+
+.queue-item {
+  background: linear-gradient(135deg, var(--yellow), var(--orange));
+  color: #000;
+  font-family: 'Fredoka One', cursive;
+  font-size: 18px;
+  padding: 14px 20px;
+  border-radius: 12px;
+  min-width: 56px;
+  text-align: center;
+  animation: slideInLeft 0.3s ease;
+  transition: all 0.3s;
+}
+
+.queue-label {
+  font-size: 10px;
+  color: var(--dim);
+  text-align: center;
+  margin-top: 4px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-20px); opacity: 0; }
+  to   { transform: translateX(0); opacity: 1; }
+}
+
+/* ── BINARY SEARCH ── */
+#search-canvas {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  min-height: 80px;
+  padding: 10px 0;
+}
+
+.search-cell {
+  width: 52px; height: 52px;
+  border-radius: 12px;
+  border: 3px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Fredoka One', cursive;
+  font-size: 16px;
+  transition: all 0.3s;
+  position: relative;
+}
+
+.search-cell.default { border-color: var(--blue);   color: var(--blue); }
+.search-cell.range   { border-color: var(--purple); color: var(--purple); background: rgba(168,85,247,0.1); }
+.search-cell.mid     { border-color: var(--yellow); color: var(--yellow); background: rgba(251,191,36,0.15); transform: scale(1.15); }
+.search-cell.found   { border-color: var(--green);  color: var(--green);  background: rgba(74,222,128,0.15); transform: scale(1.2); }
+.search-cell.out     { opacity: 0.25; }
+
+.search-pointer {
+  position: absolute;
+  bottom: -20px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* ── STEP COUNTER ── */
+.step-counter {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.step-counter strong { color: var(--text); font-size: 14px; }
+
+.progress-bar {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--pink), var(--purple));
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+/* ── INFO CARDS ── */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.info-card {
+  background: var(--card2);
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  text-align: center;
+}
+
+.info-card .val {
+  font-family: 'Fredoka One', cursive;
+  font-size: 20px;
+  margin-bottom: 4px;
+}
+
+.info-card .lbl { font-size: 11px; color: var(--dim); letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── SECTION HIDDEN ── */
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+<!-- THEME TOGGLE -->
+<button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
+
+<div class="container">
+
+<!-- HEADER -->
+<header>
+  <div class="logo">🧠 DSA Visualizer</div>
+  <div class="tagline">Learn algorithms by watching them come alive ✨</div>
+</header>
+
+<!-- CATEGORY TABS -->
+<div class="tabs">
+  <button class="tab active" data-cat="sorting"  onclick="switchCat('sorting')">🔢 Sorting</button>
+  <button class="tab"        data-cat="graph"    onclick="switchCat('graph')">🕸 Graph</button>
+  <button class="tab"        data-cat="linked"   onclick="switchCat('linked')">🔗 Linked List</button>
+  <button class="tab"        data-cat="stack"    onclick="switchCat('stack')">📚 Stack</button>
+  <button class="tab"        data-cat="queue"    onclick="switchCat('queue')">🚶 Queue</button>
+  <button class="tab"        data-cat="search"   onclick="switchCat('search')">🔍 Binary Search</button>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-title">🎯 Choose Algorithm</div>
+    <div id="algo-list"></div>
+    <div class="complexity-box" id="complexity-box">
+      <h4>📊 Complexity</h4>
+      <div class="complexity-row"><span>Time</span><span id="cx-time">—</span></div>
+      <div class="complexity-row"><span>Space</span><span id="cx-space">—</span></div>
+      <div class="complexity-row"><span>Stable</span><span id="cx-stable">—</span></div>
+    </div>
+  </div>
+
+  <!-- PANEL -->
+  <div class="panel">
+    <div class="panel-header">
+      <div class="panel-title" id="panel-title">Bubble Sort</div>
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-pink"   id="btn-start"  onclick="startViz()">▶ Start</button>
+        <button class="btn btn-gray"   id="btn-pause"  onclick="pauseViz()" disabled>⏸ Pause</button>
+        <button class="btn btn-gray"   id="btn-step"   onclick="stepViz()" disabled>⏭ Step</button>
+        <button class="btn btn-purple" id="btn-reset"  onclick="resetViz()">↺ Reset</button>
+      </div>
+    </div>
+    <div class="panel-body">
+
+      <!-- Step message -->
+      <div class="step-msg" id="step-msg">👆 Press Start to begin the visualization!</div>
+
+      <!-- SORTING SECTION -->
+      <div class="section active" id="sec-sorting">
+        <div class="controls">
+          <input type="text" id="sort-input" placeholder="e.g. 5,3,8,1,9,2" style="flex:1;min-width:160px"/>
+          <button class="btn btn-yellow" onclick="randomArray()">🎲 Random</button>
+          <div class="speed-wrap">
+            🐌 <input type="range" id="speed" min="100" max="1500" value="600" step="100"> 🐇
+          </div>
+        </div>
+        <div id="sort-canvas"></div>
+      </div>
+
+      <!-- GRAPH SECTION -->
+      <div class="section" id="sec-graph">
+        <div class="controls">
+          <select id="graph-preset" onchange="loadGraphPreset()">
+            <option value="simple">Simple Graph (6 nodes)</option>
+            <option value="tree">Tree Graph (7 nodes)</option>
+            <option value="weighted">Weighted Graph (5 nodes)</option>
+            <option value="cycle">Cycle Graph (5 nodes)</option>
+          </select>
+          <select id="graph-start">
+            <option value="A">Start: A</option>
+            <option value="B">Start: B</option>
+            <option value="C">Start: C</option>
+          </select>
+        </div>
+        <div id="graph-canvas"></div>
+      </div>
+
+      <!-- LINKED LIST SECTION -->
+      <div class="section" id="sec-linked">
+        <div class="controls" style="flex-wrap:wrap">
+          <input type="number" id="ll-value" placeholder="Value e.g. 5" style="width:110px" value="10"/>
+          <button class="btn btn-green"  onclick="llOp('insert_end')">+ Insert End</button>
+          <button class="btn btn-pink"   onclick="llOp('insert_front')">+ Insert Front</button>
+          <button class="btn btn-yellow" onclick="llOp('delete')">🗑 Delete</button>
+          <button class="btn btn-purple" onclick="llOp('search')">🔍 Search</button>
+          <button class="btn btn-gray"   onclick="llOp('reverse')">↩ Reverse</button>
+          <button class="btn btn-yellow" onclick="llPreFill()">🎲 Pre-fill List</button>
+        </div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:8px">💡 Enter a number then click an operation. Use Pre-fill to start with sample data.</div>
+        <div id="ll-canvas"></div>
+      </div>
+
+      <!-- STACK SECTION -->
+      <div class="section" id="sec-stack">
+        <div class="controls">
+          <input type="number" id="stack-value" placeholder="Value e.g. 7" style="width:120px" value="5"/>
+          <button class="btn btn-purple" onclick="stackOp('push')">📥 Push</button>
+          <button class="btn btn-pink"   onclick="stackOp('pop')">📤 Pop</button>
+          <button class="btn btn-yellow" onclick="stackOp('peek')">👀 Peek</button>
+          <button class="btn btn-yellow" onclick="stackPreFill()">🎲 Pre-fill</button>
+        </div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:8px">💡 Enter a number → Push to add. Pop to remove from top. Use Pre-fill for sample data.</div>
+        <div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap">
+          <div>
+            <div style="font-size:11px;color:var(--dim);margin-bottom:8px;letter-spacing:1px">STACK (LIFO)</div>
+            <div id="stack-canvas"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUEUE SECTION -->
+      <div class="section" id="sec-queue">
+        <div class="controls">
+          <input type="number" id="queue-value" placeholder="Value e.g. 8" style="width:120px" value="5"/>
+          <button class="btn btn-yellow" onclick="queueOp('enqueue')">➡ Enqueue</button>
+          <button class="btn btn-pink"   onclick="queueOp('dequeue')">⬅ Dequeue</button>
+          <button class="btn btn-purple" onclick="queueOp('front')">👁 Front</button>
+          <button class="btn btn-yellow" onclick="queuePreFill()">🎲 Pre-fill</button>
+        </div>
+        <div style="font-size:12px;color:var(--dim);margin-bottom:8px">💡 Enter a number → Enqueue adds to rear. Dequeue removes from front. Use Pre-fill for sample data.</div>
+        <div style="font-size:11px;color:var(--dim);margin-bottom:8px;letter-spacing:1px">QUEUE (FIFO) — FRONT ← → REAR</div>
+        <div id="queue-canvas"></div>
+      </div>
+
+      <!-- BINARY SEARCH SECTION -->
+      <div class="section" id="sec-search">
+        <div class="controls">
+          <input type="text" id="search-array" placeholder="Sorted array e.g. 2,5,8,12,16,23" style="flex:1;min-width:180px"/>
+          <input type="number" id="search-target" placeholder="Target" style="width:90px"/>
+          <button class="btn btn-yellow" onclick="randomSearchArray()">🎲 Random</button>
+        </div>
+        <div id="search-canvas"></div>
+      </div>
+
+      <!-- CODE SECTION -->
+      <div class="code-section" id="code-section">
+        <div class="code-header">
+          <div class="code-header-left">
+            <div class="code-title">💻 Code</div>
+            <div class="code-lang-tabs">
+              <button class="code-lang-btn active" onclick="switchLang('c')" id="btn-lang-c">C</button>
+              <button class="code-lang-btn" onclick="switchLang('cpp')" id="btn-lang-cpp">C++</button>
+              <button class="code-lang-btn" onclick="switchLang('python')" id="btn-lang-python">Python</button>
+            </div>
+          </div>
+          <button class="code-copy-btn" onclick="copyCode()">📋 Copy</button>
+        </div>
+        <pre class="code-block" id="code-block">Select an algorithm to see its code</pre>
+      </div>
+
+      <!-- STEP COUNTER -->
+      <div class="step-counter">
+        <span>Step <strong id="step-num">0</strong> / <strong id="step-total">0</strong></span>
+        <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+      </div>
+
+      <!-- INFO CARDS -->
+      <div class="info-grid" id="info-cards"></div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════════
+const BASE = 'http://localhost:5001';
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let currentCat  = 'sorting';
+let currentAlgo = 'bubble';
+let steps       = [];
+let stepIndex   = 0;
+let playing     = false;
+let playTimer   = null;
+let llState     = [];
+let stackState  = [];
+let queueState  = [];
+let graphPreset = null;
+
+// ═══════════════════════════════════════════
+// ALGORITHM META
+// ═══════════════════════════════════════════
+const ALGOS = {
+  sorting: [
+    { id:'bubble',    name:'Bubble Sort',    icon:'🫧', time:'O(n²)',     space:'O(1)',    stable:'Yes' },
+    { id:'insertion', name:'Insertion Sort', icon:'🔽', time:'O(n²)',     space:'O(1)',    stable:'Yes' },
+    { id:'selection', name:'Selection Sort', icon:'✋', time:'O(n²)',     space:'O(1)',    stable:'No'  },
+    { id:'merge',     name:'Merge Sort',     icon:'🔀', time:'O(n log n)',space:'O(n)',    stable:'Yes' },
+    { id:'quick',     name:'Quick Sort',     icon:'⚡', time:'O(n log n)',space:'O(log n)',stable:'No'  },
+  ],
+  graph: [
+    { id:'bfs',       name:'BFS',            icon:'🌊', time:'O(V+E)',    space:'O(V)',    stable:'—' },
+    { id:'dfs',       name:'DFS',            icon:'🌀', time:'O(V+E)',    space:'O(V)',    stable:'—' },
+    { id:'dijkstra',  name:'Dijkstra',       icon:'🗺', time:'O(E log V)',space:'O(V)',    stable:'—' },
+  ],
+  linked: [
+    { id:'insert_end',   name:'Insert End',   icon:'➕', time:'O(n)',  space:'O(1)', stable:'—' },
+    { id:'insert_front', name:'Insert Front', icon:'⬆', time:'O(1)',  space:'O(1)', stable:'—' },
+    { id:'delete',       name:'Delete Node',  icon:'🗑', time:'O(n)',  space:'O(1)', stable:'—' },
+    { id:'search',       name:'Search',       icon:'🔍', time:'O(n)',  space:'O(1)', stable:'—' },
+    { id:'reverse',      name:'Reverse List', icon:'↩', time:'O(n)',  space:'O(1)', stable:'—' },
+  ],
+  stack:  [
+    { id:'push',  name:'Push',  icon:'📥', time:'O(1)', space:'O(1)', stable:'—' },
+    { id:'pop',   name:'Pop',   icon:'📤', time:'O(1)', space:'O(1)', stable:'—' },
+    { id:'peek',  name:'Peek',  icon:'👀', time:'O(1)', space:'O(1)', stable:'—' },
+  ],
+  queue:  [
+    { id:'enqueue', name:'Enqueue', icon:'➡', time:'O(1)', space:'O(1)', stable:'—' },
+    { id:'dequeue', name:'Dequeue', icon:'⬅', time:'O(1)', space:'O(1)', stable:'—' },
+    { id:'front',   name:'Front',   icon:'👁', time:'O(1)', space:'O(1)', stable:'—' },
+  ],
+  search: [
+    { id:'binary', name:'Binary Search', icon:'🔍', time:'O(log n)', space:'O(1)', stable:'—' },
+  ],
+};
+
+// ═══════════════════════════════════════════
+// GRAPH PRESETS
+// ═══════════════════════════════════════════
+const GRAPH_PRESETS = {
+  simple: {
+    nodes: ['A','B','C','D','E','F'],
+    edges: [{from:'A',to:'B'},{from:'A',to:'C'},{from:'B',to:'D'},{from:'B',to:'E'},{from:'C',to:'F'},{from:'D',to:'E'}],
+    positions: { A:[50,50], B:[25,70], C:[75,70], D:[15,90], E:[40,90], F:[65,90] }
+  },
+  tree: {
+    nodes: ['A','B','C','D','E','F','G'],
+    edges: [{from:'A',to:'B'},{from:'A',to:'C'},{from:'B',to:'D'},{from:'B',to:'E'},{from:'C',to:'F'},{from:'C',to:'G'}],
+    positions: { A:[50,15], B:[25,40], C:[75,40], D:[12,70], E:[38,70], F:[62,70], G:[88,70] }
+  },
+  weighted: {
+    nodes: ['A','B','C','D','E'],
+    edges: [{from:'A',to:'B',weight:4},{from:'A',to:'C',weight:2},{from:'B',to:'D',weight:3},{from:'C',to:'D',weight:1},{from:'C',to:'E',weight:5},{from:'D',to:'E',weight:2}],
+    positions: { A:[20,50], B:[45,20], C:[45,80], D:[70,50], E:[90,50] }
+  },
+  cycle: {
+    nodes: ['A','B','C','D','E'],
+    edges: [{from:'A',to:'B'},{from:'B',to:'C'},{from:'C',to:'D'},{from:'D',to:'E'},{from:'E',to:'A'},{from:'A',to:'C'}],
+    positions: { A:[50,15], B:[85,40], C:[70,80], D:[30,80], E:[15,40] }
+  }
+};
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+function init() {
+  switchCat('sorting');
+  // Generate initial array immediately
+  const arr = Array.from({length:10}, () => Math.floor(Math.random()*90)+5);
+  document.getElementById('sort-input').value = arr.join(', ');
+  renderBars(arr);
+  loadGraphPreset();
+  setMsg('👆 Press ▶ Start to begin the visualization!', '');
+}
+
+// Local sorting algorithms (browser fallback when backend is offline)
+function localSort(algo, inputArr) {
+  const steps = [];
+  const a = [...inputArr];
+
+  if (algo === 'bubble') {
+    const n = a.length;
+    for (let i = 0; i < n; i++) {
+      for (let j = 0; j < n-i-1; j++) {
+        steps.push({type:'compare', i:j, j:j+1, array:[...a]});
+        if (a[j] > a[j+1]) {
+          [a[j],a[j+1]] = [a[j+1],a[j]];
+          steps.push({type:'swap', i:j, j:j+1, array:[...a]});
+        }
+      }
+      steps.push({type:'sorted', index:n-i-1, array:[...a]});
+    }
+  } else if (algo === 'selection') {
+    const n = a.length;
+    for (let i = 0; i < n; i++) {
+      let min = i;
+      for (let j = i+1; j < n; j++) {
+        steps.push({type:'compare', i:min, j:j, array:[...a]});
+        if (a[j] < a[min]) min = j;
+      }
+      if (min !== i) { [a[i],a[min]] = [a[min],a[i]]; steps.push({type:'swap', i:i, j:min, array:[...a]}); }
+      steps.push({type:'sorted', index:i, array:[...a]});
+    }
+  } else if (algo === 'insertion') {
+    for (let i = 1; i < a.length; i++) {
+      let j = i;
+      while (j > 0 && a[j-1] > a[j]) {
+        steps.push({type:'compare', i:j-1, j:j, array:[...a]});
+        [a[j-1],a[j]] = [a[j],a[j-1]];
+        steps.push({type:'swap', i:j-1, j:j, array:[...a]});
+        j--;
+      }
+      steps.push({type:'sorted', index:i, array:[...a]});
+    }
+  } else if (algo === 'quick') {
+    function partition(lo, hi) {
+      const pivot = a[hi];
+      steps.push({type:'pivot', index:hi, array:[...a]});
+      let i = lo - 1;
+      for (let j = lo; j < hi; j++) {
+        steps.push({type:'compare', i:j, j:hi, array:[...a]});
+        if (a[j] <= pivot) { i++; [a[i],a[j]]=[a[j],a[i]]; steps.push({type:'swap',i:i,j:j,array:[...a]}); }
+      }
+      [a[i+1],a[hi]]=[a[hi],a[i+1]];
+      steps.push({type:'swap',i:i+1,j:hi,array:[...a]});
+      steps.push({type:'sorted',index:i+1,array:[...a]});
+      return i+1;
+    }
+    function qs(lo, hi) { if (lo<hi) { const p=partition(lo,hi); qs(lo,p-1); qs(p+1,hi); } }
+    qs(0, a.length-1);
+  } else {
+    // merge - use bubble as fallback
+    return localSort('bubble', inputArr);
+  }
+  return steps;
+}
+
+function switchCat(cat) {
+  currentCat = cat;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.cat === cat));
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.getElementById(`sec-${cat}`).classList.add('active');
+
+  const list = document.getElementById('algo-list');
+  list.innerHTML = ALGOS[cat].map(a => `
+    <button class="algo-btn ${a.id === currentAlgo || (cat !== 'sorting' && ALGOS[cat][0].id === a.id) ? 'active':''}"
+      onclick="selectAlgo('${a.id}','${cat}')">
+      ${a.icon} ${a.name}
+    </button>
+  `).join('');
+
+  const first = ALGOS[cat][0];
+  currentAlgo = first.id;
+  updateComplexity(first);
+  document.getElementById('panel-title').textContent = first.icon + ' ' + first.name;
+  showCode(first.id);
+  resetViz();
+}
+
+function selectAlgo(id, cat) {
+  currentAlgo = id;
+  document.querySelectorAll('.algo-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.algo-btn').classList.add('active');
+  const meta = ALGOS[cat].find(a => a.id === id);
+  if (meta) {
+    updateComplexity(meta);
+    document.getElementById('panel-title').textContent = meta.icon + ' ' + meta.name;
+  }
+  showCode(id);
+  resetViz();
+}
+
+function updateComplexity(meta) {
+  document.getElementById('cx-time').textContent   = meta.time;
+  document.getElementById('cx-space').textContent  = meta.space;
+  document.getElementById('cx-stable').textContent = meta.stable;
+}
+
+// ═══════════════════════════════════════════
+// PLAYBACK CONTROLS
+// ═══════════════════════════════════════════
+function startViz() {
+  if (steps.length === 0) {
+    prepareSteps().then(() => { if (steps.length) play(); });
+  } else {
+    play();
+  }
+}
+
+function play() {
+  playing = true;
+  document.getElementById('btn-pause').disabled = false;
+  document.getElementById('btn-step').disabled  = false;
+  document.getElementById('btn-start').disabled = true;
+  tick();
+}
+
+function tick() {
+  if (!playing || stepIndex >= steps.length) {
+    stopPlay();
+    return;
+  }
+  applyStep(steps[stepIndex]);
+  updateProgress();
+  stepIndex++;
+  const speed = 1600 - parseInt(document.getElementById('speed').value);
+  playTimer = setTimeout(tick, speed);
+}
+
+function pauseViz() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById('btn-pause').disabled = true;
+  document.getElementById('btn-start').disabled = false;
+}
+
+function stepViz() {
+  if (steps.length === 0) {
+    prepareSteps().then(() => { if (steps.length) { applyStep(steps[0]); stepIndex=1; updateProgress(); } });
+    return;
+  }
+  if (stepIndex < steps.length) {
+    applyStep(steps[stepIndex]);
+    stepIndex++;
+    updateProgress();
+  }
+}
+
+function stopPlay() {
+  playing = false;
+  clearTimeout(playTimer);
+  document.getElementById('btn-pause').disabled = true;
+  document.getElementById('btn-start').disabled = false;
+  if (stepIndex >= steps.length && steps.length > 0) {
+    setMsg('✅ Done!', 'sorted');
+  }
+}
+
+function resetViz() {
+  stopPlay();
+  steps = []; stepIndex = 0;
+  document.getElementById('btn-step').disabled = false;
+  setMsg('👆 Press Start to begin the visualization!', '');
+  updateProgress();
+  document.getElementById('info-cards').innerHTML = '';
+  if (currentCat === 'sorting') renderBars(parseArray(document.getElementById('sort-input').value) || []);
+  if (currentCat === 'graph') renderGraph(GRAPH_PRESETS[document.getElementById('graph-preset').value]);
+  if (currentCat === 'search') renderSearchCells([], -1, -1, -1, [], -1);
+}
+
+function updateProgress() {
+  const total = steps.length;
+  const cur   = stepIndex;
+  document.getElementById('step-num').textContent   = cur;
+  document.getElementById('step-total').textContent = total;
+  document.getElementById('progress-fill').style.width = total ? `${(cur/total)*100}%` : '0%';
+}
+
+// ═══════════════════════════════════════════
+// STEP PREPARATION — call backend
+// ═══════════════════════════════════════════
+async function prepareSteps() {
+  try {
+    if (currentCat === 'sorting') {
+      const arr = parseArray(document.getElementById('sort-input').value);
+      if (!arr || arr.length < 2) { setMsg('⚠ Enter at least 2 numbers separated by commas!', 'error'); return; }
+      try {
+        const res = await post('/api/sort', { algorithm: currentAlgo, array: arr });
+        steps = res.steps;
+        showInfoCards([
+          { val: arr.length,      lbl: 'Elements', color: 'var(--blue)' },
+          { val: res.stepCount,   lbl: 'Steps',    color: 'var(--pink)' },
+          { val: res.sorted.join(', '), lbl: 'Sorted Result', color: 'var(--green)' },
+        ]);
+      } catch(backendErr) {
+        // Full local fallback - run algorithm in browser
+        steps = localSort(currentAlgo, arr);
+        const sorted = [...arr].sort((a,b)=>a-b);
+        showInfoCards([
+          { val: arr.length,  lbl: 'Elements', color: 'var(--blue)' },
+          { val: steps.length, lbl: 'Steps',   color: 'var(--pink)' },
+          { val: sorted.join(', '), lbl: 'Sorted Result', color: 'var(--green)' },
+        ]);
+      }
+      return;
+    }
+    if (currentCat === 'graph') {
+      const preset = GRAPH_PRESETS[document.getElementById('graph-preset').value];
+      const start  = document.getElementById('graph-start').value;
+      const algo   = currentAlgo === 'bfs' ? 'bfs' : currentAlgo === 'dfs' ? 'dfs' : 'dijkstra';
+      const res    = await post(`/api/graph/${algo}`, { nodes: preset.nodes, edges: preset.edges, start });
+      steps = res.steps;
+      showInfoCards([
+        { val: preset.nodes.length, lbl: 'Nodes', color: 'var(--blue)' },
+        { val: preset.edges.length, lbl: 'Edges', color: 'var(--purple)' },
+        { val: res.order ? res.order.join('→') : '—', lbl: 'Visit Order', color: 'var(--green)' },
+      ]);
+    }
+    else if (currentCat === 'search') {
+      const arr    = parseArray(document.getElementById('search-array').value);
+      const target = parseInt(document.getElementById('search-target').value);
+      if (!arr || isNaN(target)) { setMsg('⚠ Enter array and target!', 'error'); return; }
+      const sorted = [...arr].sort((a,b)=>a-b);
+      const res    = await post('/api/search/binary', { array: sorted, target });
+      steps = res.steps;
+      showInfoCards([
+        { val: arr.length, lbl: 'Elements', color: 'var(--blue)' },
+        { val: target,     lbl: 'Target',   color: 'var(--yellow)' },
+        { val: res.foundAt >= 0 ? `Index ${res.foundAt}` : 'Not Found', lbl: 'Result', color: res.foundAt >= 0 ? 'var(--green)' : 'var(--red)' },
+      ]);
+    }
+  } catch(e) {
+    setMsg(`⚠ Backend offline — start Flask with python app.py`, 'error');
+  }
+}
+
+async function post(path, body) {
+  const r = await fetch(BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const j = await r.json();
+  if (!j.success) throw new Error(j.error);
+  return j.data;
+}
+
+// ═══════════════════════════════════════════
+// APPLY STEP — update visualization
+// ═══════════════════════════════════════════
+function applyStep(step) {
+  if (currentCat === 'sorting') applySortStep(step);
+  if (currentCat === 'graph')   applyGraphStep(step);
+  if (currentCat === 'search')  applySearchStep(step);
+}
+
+// ─ SORTING ─
+function applySortStep(step) {
+  const arr = step.array || [];
+  const classes = {};
+  if (step.type === 'compare') {
+    setMsg(`🔍 Comparing index ${step.i} (${arr[step.i]}) and ${step.j} (${arr[step.j]})`, 'compare');
+    classes[step.i] = 'compare'; classes[step.j] = 'compare';
+  } else if (step.type === 'swap') {
+    setMsg(`🔄 Swapping ${arr[step.i]} ↔ ${arr[step.j]}`, 'swap');
+    classes[step.i] = 'swap'; classes[step.j] = 'swap';
+  } else if (step.type === 'sorted') {
+    setMsg(`✅ Position ${step.index} is sorted!`, 'sorted');
+    classes[step.index] = 'sorted';
+  } else if (step.type === 'pivot') {
+    setMsg(`📌 Pivot selected: ${arr[step.index]}`, 'compare');
+    classes[step.index] = 'pivot';
+  } else if (step.type === 'merge') {
+    setMsg(`🔀 Merging range [${step.left}...${step.right}]`, 'compare');
+  }
+  renderBars(arr, classes);
+}
+
+// ─ GRAPH ─
+function applyGraphStep(step) {
+  if (step.type === 'visit')    { setMsg(`👣 Visiting node ${step.node}`, 'visit'); highlightNode(step.node, 'visiting'); }
+  if (step.type === 'explore')  { setMsg(`🔍 Exploring edge ${step.from} → ${step.to}`, 'compare'); highlightEdge(step.from, step.to, 'active'); }
+  if (step.type === 'enqueue')  { setMsg(`📥 Enqueueing ${step.node}`, ''); highlightNode(step.node, 'visited'); }
+  if (step.type === 'backtrack'){ setMsg(`↩ Backtracking from ${step.node}`, ''); highlightNode(step.node, 'visited'); }
+  if (step.type === 'recurse')  { setMsg(`🔁 Recursing into ${step.to}`, 'compare'); }
+  if (step.type === 'relax')    { setMsg(`⚖ Relaxing edge ${step.from}→${step.to} (weight ${step.weight})`, 'compare'); highlightEdge(step.from, step.to, 'active'); }
+  if (step.type === 'update')   { setMsg(`📉 Updated distance to ${step.node}`, 'sorted'); highlightNode(step.node, 'visited'); }
+}
+
+// ─ SEARCH ─
+function applySearchStep(step) {
+  if (!step.array) return;
+  const msg = step.message || '';
+  if (step.type === 'mid')      setMsg(`🎯 ${msg}`, 'compare');
+  else if (step.type === 'found')    setMsg(`🎉 ${msg}`, 'found');
+  else if (step.type === 'notfound') setMsg(`😢 ${msg}`, 'error');
+  else if (step.type === 'goright')  setMsg(`➡ ${msg}`, 'compare');
+  else if (step.type === 'goleft')   setMsg(`⬅ ${msg}`, 'compare');
+  else setMsg(msg, '');
+  renderSearchCells(step.array, step.left ?? 0, step.right ?? step.array.length-1, step.mid ?? -1, [], step.type === 'found' ? step.index : -1);
+}
+
+// ═══════════════════════════════════════════
+// RENDER FUNCTIONS
+// ═══════════════════════════════════════════
+
+function renderBars(arr, classes={}) {
+  const canvas = document.getElementById('sort-canvas');
+  const max    = Math.max(...arr, 1);
+  canvas.innerHTML = arr.map((v,i) => {
+    const h   = Math.max(14, Math.round((v / max) * 200));
+    const cls = classes[i] || 'default';
+    return `<div class="bar ${cls}" style="height:${h}px" title="${v}">
+              <span class="bar-label">${v}</span>
+            </div>`;
+  }).join('');
+}
+
+function renderGraph(preset) {
+  graphPreset = preset;
+  const canvas = document.getElementById('graph-canvas');
+  const W = canvas.offsetWidth || 600;
+  const H = canvas.offsetHeight || 320;
+
+  canvas.innerHTML = '';
+
+  // Draw edges first (SVG)
+  const svg = document.createElementNS('http://www.w3.org/2000/svg','svg');
+  svg.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none';
+  canvas.appendChild(svg);
+
+  preset.edges.forEach(e => {
+    const [x1p,y1p] = preset.positions[e.from];
+    const [x2p,y2p] = preset.positions[e.to];
+    const x1 = x1p/100*W, y1 = y1p/100*H;
+    const x2 = x2p/100*W, y2 = y2p/100*H;
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    line.setAttribute('stroke','#2e2b4a'); line.setAttribute('stroke-width','2');
+    line.id = `edge-${e.from}-${e.to}`;
+    svg.appendChild(line);
+
+    if (e.weight) {
+      const mx = (x1+x2)/2, my = (y1+y2)/2;
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x',mx); txt.setAttribute('y',my-5);
+      txt.setAttribute('fill','#fbbf24'); txt.setAttribute('font-size','12');
+      txt.setAttribute('text-anchor','middle'); txt.setAttribute('font-family','Fredoka One');
+      txt.textContent = e.weight;
+      svg.appendChild(txt);
+    }
+  });
+
+  // Draw nodes
+  preset.nodes.forEach(n => {
+    const [xp, yp] = preset.positions[n];
+    const node = document.createElement('div');
+    node.className = 'graph-node unvisited';
+    node.id = `node-${n}`;
+    node.textContent = n;
+    node.style.left = `${xp}%`;
+    node.style.top  = `${yp}%`;
+    canvas.appendChild(node);
+  });
+
+  // Update start dropdown
+  const sel = document.getElementById('graph-start');
+  sel.innerHTML = preset.nodes.map(n => `<option value="${n}">Start: ${n}</option>`).join('');
+}
+
+function highlightNode(id, cls) {
+  const el = document.getElementById(`node-${id}`);
+  if (el) {
+    el.className = `graph-node ${cls}`;
+  }
+}
+
+function highlightEdge(from, to, cls) {
+  const e1 = document.getElementById(`edge-${from}-${to}`);
+  const e2 = document.getElementById(`edge-${to}-${from}`);
+  const clr = cls === 'active' ? '#fbbf24' : '#4ade80';
+  if (e1) e1.setAttribute('stroke', clr);
+  if (e2) e2.setAttribute('stroke', clr);
+}
+
+function renderLinkedList(list, activeIdx=-1, foundIdx=-1, deletedIdx=-1, newIdx=-1) {
+  const canvas = document.getElementById('ll-canvas');
+  if (list.length === 0) {
+    canvas.innerHTML = '<span style="color:var(--dim);font-size:13px">Empty list — add some nodes!</span>';
+    return;
+  }
+  canvas.innerHTML = list.map((v,i) => {
+    let cls = '';
+    if (i === activeIdx)  cls = 'active';
+    if (i === foundIdx)   cls = 'found';
+    if (i === deletedIdx) cls = 'deleted';
+    if (i === newIdx)     cls = 'new-node';
+    const arrow = i < list.length - 1 ? '<span class="ll-arrow">→</span>' : '';
+    return `<div class="ll-node"><div class="ll-box ${cls}">${v}</div>${arrow}</div>`;
+  }).join('') + '<span class="ll-null"> → NULL</span>';
+}
+
+function renderStack(stack) {
+  const canvas = document.getElementById('stack-canvas');
+  if (stack.length === 0) {
+    canvas.innerHTML = '<div style="color:var(--dim);font-size:13px;padding:20px">Stack is empty</div>';
+    return;
+  }
+  canvas.innerHTML = stack.map((v,i) => `
+    <div class="stack-item ${i === stack.length-1 ? 'top' : ''}">${v}</div>
+  `).join('');
+}
+
+function renderQueue(queue) {
+  const canvas = document.getElementById('queue-canvas');
+  if (queue.length === 0) {
+    canvas.innerHTML = '<div style="color:var(--dim);font-size:13px">Queue is empty</div>';
+    return;
+  }
+  canvas.innerHTML = queue.map((v,i) => `
+    <div>
+      <div class="queue-item">${v}</div>
+      <div class="queue-label">${i===0?'FRONT':i===queue.length-1?'REAR':''}</div>
+    </div>
+  `).join('');
+}
+
+function renderSearchCells(arr, left, right, mid, _x, foundIdx) {
+  const canvas = document.getElementById('search-canvas');
+  canvas.innerHTML = arr.map((v,i) => {
+    let cls = 'default';
+    if (i === foundIdx) cls = 'found';
+    else if (i === mid) cls = 'mid';
+    else if (i >= left && i <= right) cls = 'range';
+    else cls = 'out';
+
+    let pointer = '';
+    if (i === left && i !== mid) pointer += `<div class="search-pointer" style="color:var(--blue)">L</div>`;
+    if (i === right && i !== mid) pointer += `<div class="search-pointer" style="color:var(--blue);right:0">R</div>`;
+    if (i === mid)  pointer += `<div class="search-pointer" style="color:var(--yellow)">MID</div>`;
+
+    return `<div class="search-cell ${cls}" style="position:relative">${v}${pointer}</div>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════
+// LINKED LIST OPERATIONS (direct, no steps needed)
+// ═══════════════════════════════════════════
+async function llOp(operation) {
+  const val = parseInt(document.getElementById('ll-value').value);
+
+  if (['insert_end','insert_front','delete','search'].includes(operation) && isNaN(val)) {
+    setMsg('⚠ Enter a value first!', 'error'); return;
+  }
+
+  try {
+    const res = await post('/api/linkedlist', { operation, values: llState, target: val });
+    llState = res.result;
+
+    // Replay steps visually
+    steps = res.steps; stepIndex = 0;
+    showInfoCards([
+      { val: llState.length, lbl: 'Length', color: 'var(--green)' },
+      { val: operation,      lbl: 'Operation', color: 'var(--blue)' },
+    ]);
+    play();
+    applyLLSteps(res.steps, res.result);
+  } catch(e) {
+    // Offline fallback
+    if (operation === 'insert_end')   llState.push(val);
+    if (operation === 'insert_front') llState.unshift(val);
+    if (operation === 'delete')       { const i = llState.indexOf(val); if(i>=0) llState.splice(i,1); }
+    if (operation === 'reverse')      llState.reverse();
+    renderLinkedList(llState);
+    setMsg(`✅ ${operation} done (offline mode)`, 'sorted');
+  }
+}
+
+async function applyLLSteps(llSteps, finalList) {
+  for (let i = 0; i < llSteps.length; i++) {
+    const s = llSteps[i];
+    const list = s.list || finalList;
+    setMsg(s.message || '', s.type === 'found' ? 'found' : s.type === 'delete' ? 'swap' : '');
+    if (s.type === 'traverse') renderLinkedList(list, s.index);
+    else if (s.type === 'found')  renderLinkedList(list, -1, s.index);
+    else if (s.type === 'delete') renderLinkedList(list, -1, -1, s.index);
+    else if (s.type === 'insert') renderLinkedList(list, -1, -1, -1, s.index);
+    else if (s.type === 'swap')   renderLinkedList(list, s.i);
+    else renderLinkedList(list);
+    await sleep(400);
+  }
+  renderLinkedList(finalList);
+}
+
+// ═══════════════════════════════════════════
+// STACK OPERATIONS
+// ═══════════════════════════════════════════
+async function stackOp(op) {
+  const val = parseInt(document.getElementById('stack-value').value);
+  if (op === 'push' && isNaN(val)) { setMsg('⚠ Enter a value!','error'); return; }
+
+  try {
+    const ops = op === 'push' ? [{op:'push',value:val}] : [{op}];
+    const res = await post('/api/stack', { operations: [{...ops[0]}] });
+    const last = res.steps[res.steps.length - 1];
+    stackState = last.stack || stackState;
+    setMsg(last.message || '', last.type === 'push' ? 'sorted' : last.type === 'pop' ? 'swap' : last.type === 'error' ? 'error' : '');
+    renderStack(stackState);
+  } catch(e) {
+    if (op === 'push' && !isNaN(val)) { stackState.push(val); renderStack(stackState); setMsg(`📥 Pushed ${val}`, 'sorted'); }
+    else if (op === 'pop' && stackState.length) { const v = stackState.pop(); renderStack(stackState); setMsg(`📤 Popped ${v}`, 'swap'); }
+    else if (op === 'peek' && stackState.length) setMsg(`👀 Top is ${stackState[stackState.length-1]}`, 'compare');
+    else setMsg('Stack is empty!', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════
+// QUEUE OPERATIONS
+// ═══════════════════════════════════════════
+async function queueOp(op) {
+  const val = parseInt(document.getElementById('queue-value').value);
+  if (op === 'enqueue' && isNaN(val)) { setMsg('⚠ Enter a value!','error'); return; }
+
+  try {
+    const ops = op === 'enqueue' ? [{op:'enqueue',value:val}] : [{op}];
+    const res = await post('/api/queue', { operations: ops });
+    const last = res.steps[res.steps.length-1];
+    queueState = last.queue || queueState;
+    setMsg(last.message || '', last.type === 'enqueue' ? 'sorted' : last.type === 'dequeue' ? 'swap' : last.type === 'error' ? 'error' : '');
+    renderQueue(queueState);
+  } catch(e) {
+    if (op === 'enqueue' && !isNaN(val)) { queueState.push(val); renderQueue(queueState); setMsg(`➡ Enqueued ${val}`, 'sorted'); }
+    else if (op === 'dequeue' && queueState.length) { const v = queueState.shift(); renderQueue(queueState); setMsg(`⬅ Dequeued ${v}`, 'swap'); }
+    else if (op === 'front' && queueState.length) setMsg(`👁 Front is ${queueState[0]}`, 'compare');
+    else setMsg('Queue is empty!', 'error');
+  }
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function setMsg(text, type='') {
+  const el = document.getElementById('step-msg');
+  el.textContent = text;
+  el.className = `step-msg ${type}`;
+}
+
+function parseArray(str) {
+  if (!str) return null;
+  const arr = str.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+  return arr.length ? arr : null;
+}
+
+async function randomArray() {
+  const arr = Array.from({length:12}, () => Math.floor(Math.random()*90)+5);
+  document.getElementById('sort-input').value = arr.join(', ');
+  renderBars(arr);
+  steps = []; stepIndex = 0;
+  updateProgress();
+  setMsg('✅ Array ready! Press ▶ Start to visualize.', 'sorted');
+}
+
+function randomSearchArray() {
+  const arr = [...new Set(Array.from({length:10}, ()=>Math.floor(Math.random()*80)+1))].sort((a,b)=>a-b).slice(0,8);
+  document.getElementById('search-array').value = arr.join(', ');
+  document.getElementById('search-target').value = arr[Math.floor(Math.random()*arr.length)];
+  renderSearchCells(arr, 0, arr.length-1, -1, [], -1);
+}
+
+function loadGraphPreset() {
+  const key = document.getElementById('graph-preset').value;
+  renderGraph(GRAPH_PRESETS[key]);
+  resetViz();
+}
+
+function showInfoCards(cards) {
+  document.getElementById('info-cards').innerHTML = cards.map(c => `
+    <div class="info-card">
+      <div class="val" style="color:${c.color}">${c.val}</div>
+      <div class="lbl">${c.lbl}</div>
+    </div>
+  `).join('');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ═══════════════════════════════════════════
+// THEME TOGGLE
+// ═══════════════════════════════════════════
+function toggleTheme() {
+  const body = document.body;
+  const btn  = document.getElementById('themeBtn');
+  body.classList.toggle('light');
+  btn.textContent = body.classList.contains('light') ? '🌙 Dark' : '☀️ Light';
+}
+
+// ═══════════════════════════════════════════
+// PRE-FILL HELPERS
+// ═══════════════════════════════════════════
+function llPreFill() {
+  llState = [10, 20, 30, 40, 50];
+  renderLinkedList(llState);
+  setMsg('✅ Pre-filled linked list with [10 → 20 → 30 → 40 → 50]. Now try operations!', 'sorted');
+}
+
+function stackPreFill() {
+  stackState = [5, 12, 8, 3];
+  renderStack(stackState);
+  setMsg('✅ Pre-filled stack! Top is 3. Try Push/Pop/Peek!', 'sorted');
+}
+
+function queuePreFill() {
+  queueState = [7, 14, 21, 28];
+  renderQueue(queueState);
+  setMsg('✅ Pre-filled queue! Front is 7, Rear is 28. Try Enqueue/Dequeue!', 'sorted');
+}
+
+// ═══════════════════════════════════════════
+// CODE DISPLAY
+// ═══════════════════════════════════════════
+let currentLang = 'c';
+
+const CODE = {
+  bubble: {
+    c: `<span class="cm">// Bubble Sort in C</span>
+<span class="cm">// Time: O(n²)  Space: O(1)  Stable: Yes</span>
+
+<span class="kw">#include</span> <span class="st">&lt;stdio.h&gt;</span>
+
+<span class="kw">void</span> <span class="fn">bubbleSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n) {
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">0</span>; i <span class="op">&lt;</span> n<span class="op">-</span><span class="nm">1</span>; i<span class="op">++</span>) {
+        <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> <span class="nm">0</span>; j <span class="op">&lt;</span> n<span class="op">-</span>i<span class="op">-</span><span class="nm">1</span>; j<span class="op">++</span>) {
+            <span class="kw">if</span> (arr[j] <span class="op">&gt;</span> arr[j<span class="op">+</span><span class="nm">1</span>]) {
+                <span class="cm">// Swap</span>
+                <span class="kw">int</span> temp <span class="op">=</span> arr[j];
+                arr[j] <span class="op">=</span> arr[j<span class="op">+</span><span class="nm">1</span>];
+                arr[j<span class="op">+</span><span class="nm">1</span>] <span class="op">=</span> temp;
+            }
+        }
+    }
+}`,
+    cpp: `<span class="cm">// Bubble Sort in C++</span>
+<span class="cm">// Time: O(n²)  Space: O(1)  Stable: Yes</span>
+
+<span class="kw">#include</span> <span class="st">&lt;iostream&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">void</span> <span class="fn">bubbleSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n) {
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">0</span>; i <span class="op">&lt;</span> n<span class="op">-</span><span class="nm">1</span>; i<span class="op">++</span>) {
+        <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> <span class="nm">0</span>; j <span class="op">&lt;</span> n<span class="op">-</span>i<span class="op">-</span><span class="nm">1</span>; j<span class="op">++</span>) {
+            <span class="kw">if</span> (arr[j] <span class="op">&gt;</span> arr[j<span class="op">+</span><span class="nm">1</span>])
+                swap(arr[j], arr[j<span class="op">+</span><span class="nm">1</span>]);
+        }
+    }
+}`,
+    python: `<span class="cm"># Bubble Sort in Python</span>
+<span class="cm"># Time: O(n²)  Space: O(1)  Stable: Yes</span>
+
+<span class="kw">def</span> <span class="fn">bubble_sort</span>(arr):
+    n <span class="op">=</span> <span class="fn">len</span>(arr)
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(n):
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">0</span>, n<span class="op">-</span>i<span class="op">-</span><span class="nm">1</span>):
+            <span class="kw">if</span> arr[j] <span class="op">&gt;</span> arr[j<span class="op">+</span><span class="nm">1</span>]:
+                arr[j], arr[j<span class="op">+</span><span class="nm">1</span>] <span class="op">=</span> arr[j<span class="op">+</span><span class="nm">1</span>], arr[j]
+    <span class="kw">return</span> arr`
+  },
+  insertion: {
+    c: `<span class="cm">// Insertion Sort in C</span>
+<span class="kw">void</span> <span class="fn">insertionSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n) {
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">1</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>) {
+        <span class="kw">int</span> key <span class="op">=</span> arr[i];
+        <span class="kw">int</span> j <span class="op">=</span> i <span class="op">-</span> <span class="nm">1</span>;
+        <span class="kw">while</span> (j <span class="op">&gt;=</span> <span class="nm">0</span> <span class="op">&amp;&amp;</span> arr[j] <span class="op">&gt;</span> key) {
+            arr[j <span class="op">+</span> <span class="nm">1</span>] <span class="op">=</span> arr[j];
+            j<span class="op">--</span>;
+        }
+        arr[j <span class="op">+</span> <span class="nm">1</span>] <span class="op">=</span> key;
+    }
+}`,
+    cpp: `<span class="cm">// Insertion Sort in C++</span>
+<span class="kw">void</span> <span class="fn">insertionSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n) {
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">1</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>) {
+        <span class="kw">int</span> key <span class="op">=</span> arr[i], j <span class="op">=</span> i <span class="op">-</span> <span class="nm">1</span>;
+        <span class="kw">while</span> (j <span class="op">&gt;=</span> <span class="nm">0</span> <span class="op">&amp;&amp;</span> arr[j] <span class="op">&gt;</span> key)
+            arr[j<span class="op">+</span><span class="nm">1</span>] <span class="op">=</span> arr[j<span class="op">--</span>];
+        arr[j <span class="op">+</span> <span class="nm">1</span>] <span class="op">=</span> key;
+    }
+}`,
+    python: `<span class="kw">def</span> <span class="fn">insertion_sort</span>(arr):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="nm">1</span>, <span class="fn">len</span>(arr)):
+        key <span class="op">=</span> arr[i]
+        j <span class="op">=</span> i <span class="op">-</span> <span class="nm">1</span>
+        <span class="kw">while</span> j <span class="op">&gt;=</span> <span class="nm">0</span> <span class="kw">and</span> arr[j] <span class="op">&gt;</span> key:
+            arr[j <span class="op">+</span> <span class="nm">1</span>] <span class="op">=</span> arr[j]
+            j <span class="op">-=</span> <span class="nm">1</span>
+        arr[j <span class="op">+</span> <span class="nm">1</span>] <span class="op">=</span> key
+    <span class="kw">return</span> arr`
+  },
+  selection: {
+    c: `<span class="cm">// Selection Sort in C</span>
+<span class="kw">void</span> <span class="fn">selectionSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n) {
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">0</span>; i <span class="op">&lt;</span> n<span class="op">-</span><span class="nm">1</span>; i<span class="op">++</span>) {
+        <span class="kw">int</span> minIdx <span class="op">=</span> i;
+        <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> i<span class="op">+</span><span class="nm">1</span>; j <span class="op">&lt;</span> n; j<span class="op">++</span>)
+            <span class="kw">if</span> (arr[j] <span class="op">&lt;</span> arr[minIdx]) minIdx <span class="op">=</span> j;
+        <span class="kw">int</span> temp <span class="op">=</span> arr[minIdx];
+        arr[minIdx] <span class="op">=</span> arr[i];
+        arr[i] <span class="op">=</span> temp;
+    }
+}`,
+    cpp: `<span class="cm">// Selection Sort in C++</span>
+<span class="kw">void</span> <span class="fn">selectionSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n) {
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">0</span>; i <span class="op">&lt;</span> n<span class="op">-</span><span class="nm">1</span>; i<span class="op">++</span>) {
+        <span class="kw">int</span> minIdx <span class="op">=</span> i;
+        <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> i<span class="op">+</span><span class="nm">1</span>; j <span class="op">&lt;</span> n; j<span class="op">++</span>)
+            <span class="kw">if</span> (arr[j] <span class="op">&lt;</span> arr[minIdx]) minIdx <span class="op">=</span> j;
+        swap(arr[i], arr[minIdx]);
+    }
+}`,
+    python: `<span class="kw">def</span> <span class="fn">selection_sort</span>(arr):
+    <span class="kw">for</span> i <span class="kw">in</span> <span class="fn">range</span>(<span class="fn">len</span>(arr)):
+        min_idx <span class="op">=</span> i
+        <span class="kw">for</span> j <span class="kw">in</span> <span class="fn">range</span>(i<span class="op">+</span><span class="nm">1</span>, <span class="fn">len</span>(arr)):
+            <span class="kw">if</span> arr[j] <span class="op">&lt;</span> arr[min_idx]:
+                min_idx <span class="op">=</span> j
+        arr[i], arr[min_idx] <span class="op">=</span> arr[min_idx], arr[i]
+    <span class="kw">return</span> arr`
+  },
+  merge: {
+    c: `<span class="cm">// Merge Sort in C</span>
+<span class="kw">void</span> <span class="fn">merge</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> l, <span class="kw">int</span> m, <span class="kw">int</span> r) {
+    <span class="kw">int</span> n1 <span class="op">=</span> m<span class="op">-</span>l<span class="op">+</span><span class="nm">1</span>, n2 <span class="op">=</span> r<span class="op">-</span>m;
+    <span class="kw">int</span> L[n1], R[n2];
+    <span class="kw">for</span> (<span class="kw">int</span> i<span class="op">=</span><span class="nm">0</span>; i<span class="op">&lt;</span>n1; i<span class="op">++</span>) L[i] <span class="op">=</span> arr[l<span class="op">+</span>i];
+    <span class="kw">for</span> (<span class="kw">int</span> j<span class="op">=</span><span class="nm">0</span>; j<span class="op">&lt;</span>n2; j<span class="op">++</span>) R[j] <span class="op">=</span> arr[m<span class="op">+</span><span class="nm">1</span><span class="op">+</span>j];
+    <span class="kw">int</span> i<span class="op">=</span><span class="nm">0</span>, j<span class="op">=</span><span class="nm">0</span>, k<span class="op">=</span>l;
+    <span class="kw">while</span> (i<span class="op">&lt;</span>n1 <span class="op">&amp;&amp;</span> j<span class="op">&lt;</span>n2)
+        arr[k<span class="op">++</span>] <span class="op">=</span> L[i]<span class="op">&lt;=</span>R[j] ? L[i<span class="op">++</span>] : R[j<span class="op">++</span>];
+    <span class="kw">while</span> (i<span class="op">&lt;</span>n1) arr[k<span class="op">++</span>] <span class="op">=</span> L[i<span class="op">++</span>];
+    <span class="kw">while</span> (j<span class="op">&lt;</span>n2) arr[k<span class="op">++</span>] <span class="op">=</span> R[j<span class="op">++</span>];
+}
+<span class="kw">void</span> <span class="fn">mergeSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> l, <span class="kw">int</span> r) {
+    <span class="kw">if</span> (l <span class="op">&lt;</span> r) {
+        <span class="kw">int</span> m <span class="op">=</span> l <span class="op">+</span> (r<span class="op">-</span>l)<span class="op">/</span><span class="nm">2</span>;
+        <span class="fn">mergeSort</span>(arr, l, m);
+        <span class="fn">mergeSort</span>(arr, m<span class="op">+</span><span class="nm">1</span>, r);
+        <span class="fn">merge</span>(arr, l, m, r);
+    }
+}`,
+    cpp: `<span class="cm">// Merge Sort in C++</span>
+<span class="kw">void</span> <span class="fn">mergeSort</span>(vector<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;&amp;</span> arr, <span class="kw">int</span> l, <span class="kw">int</span> r) {
+    <span class="kw">if</span> (l <span class="op">&gt;=</span> r) <span class="kw">return</span>;
+    <span class="kw">int</span> m <span class="op">=</span> l <span class="op">+</span> (r<span class="op">-</span>l)<span class="op">/</span><span class="nm">2</span>;
+    <span class="fn">mergeSort</span>(arr, l, m);
+    <span class="fn">mergeSort</span>(arr, m<span class="op">+</span><span class="nm">1</span>, r);
+    inplace_merge(arr.begin()<span class="op">+</span>l,
+                  arr.begin()<span class="op">+</span>m<span class="op">+</span><span class="nm">1</span>,
+                  arr.begin()<span class="op">+</span>r<span class="op">+</span><span class="nm">1</span>);
+}`,
+    python: `<span class="kw">def</span> <span class="fn">merge_sort</span>(arr):
+    <span class="kw">if</span> <span class="fn">len</span>(arr) <span class="op">&lt;=</span> <span class="nm">1</span>:
+        <span class="kw">return</span> arr
+    mid <span class="op">=</span> <span class="fn">len</span>(arr) <span class="op">//</span> <span class="nm">2</span>
+    left  <span class="op">=</span> <span class="fn">merge_sort</span>(arr[:mid])
+    right <span class="op">=</span> <span class="fn">merge_sort</span>(arr[mid:])
+    <span class="kw">return</span> <span class="fn">merge</span>(left, right)
+
+<span class="kw">def</span> <span class="fn">merge</span>(l, r):
+    result <span class="op">=</span> []
+    i <span class="op">=</span> j <span class="op">=</span> <span class="nm">0</span>
+    <span class="kw">while</span> i <span class="op">&lt;</span> <span class="fn">len</span>(l) <span class="kw">and</span> j <span class="op">&lt;</span> <span class="fn">len</span>(r):
+        <span class="kw">if</span> l[i] <span class="op">&lt;=</span> r[j]: result.append(l[i]); i<span class="op">+=</span><span class="nm">1</span>
+        <span class="kw">else</span>: result.append(r[j]); j<span class="op">+=</span><span class="nm">1</span>
+    <span class="kw">return</span> result <span class="op">+</span> l[i:] <span class="op">+</span> r[j:]`
+  },
+  quick: {
+    c: `<span class="cm">// Quick Sort in C</span>
+<span class="kw">int</span> <span class="fn">partition</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> low, <span class="kw">int</span> high) {
+    <span class="kw">int</span> pivot <span class="op">=</span> arr[high], i <span class="op">=</span> low <span class="op">-</span> <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> low; j <span class="op">&lt;</span> high; j<span class="op">++</span>) {
+        <span class="kw">if</span> (arr[j] <span class="op">&lt;=</span> pivot) {
+            i<span class="op">++</span>;
+            <span class="kw">int</span> t <span class="op">=</span> arr[i]; arr[i] <span class="op">=</span> arr[j]; arr[j] <span class="op">=</span> t;
+        }
+    }
+    <span class="kw">int</span> t <span class="op">=</span> arr[i<span class="op">+</span><span class="nm">1</span>]; arr[i<span class="op">+</span><span class="nm">1</span>] <span class="op">=</span> arr[high]; arr[high] <span class="op">=</span> t;
+    <span class="kw">return</span> i <span class="op">+</span> <span class="nm">1</span>;
+}
+<span class="kw">void</span> <span class="fn">quickSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> low, <span class="kw">int</span> high) {
+    <span class="kw">if</span> (low <span class="op">&lt;</span> high) {
+        <span class="kw">int</span> pi <span class="op">=</span> <span class="fn">partition</span>(arr, low, high);
+        <span class="fn">quickSort</span>(arr, low, pi<span class="op">-</span><span class="nm">1</span>);
+        <span class="fn">quickSort</span>(arr, pi<span class="op">+</span><span class="nm">1</span>, high);
+    }
+}`,
+    cpp: `<span class="cm">// Quick Sort in C++</span>
+<span class="kw">int</span> <span class="fn">partition</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> low, <span class="kw">int</span> high) {
+    <span class="kw">int</span> pivot <span class="op">=</span> arr[high], i <span class="op">=</span> low <span class="op">-</span> <span class="nm">1</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> j <span class="op">=</span> low; j <span class="op">&lt;</span> high; j<span class="op">++</span>)
+        <span class="kw">if</span> (arr[j] <span class="op">&lt;=</span> pivot) swap(arr[<span class="op">++</span>i], arr[j]);
+    swap(arr[i<span class="op">+</span><span class="nm">1</span>], arr[high]);
+    <span class="kw">return</span> i <span class="op">+</span> <span class="nm">1</span>;
+}
+<span class="kw">void</span> <span class="fn">quickSort</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> low, <span class="kw">int</span> high) {
+    <span class="kw">if</span> (low <span class="op">&lt;</span> high) {
+        <span class="kw">int</span> pi <span class="op">=</span> <span class="fn">partition</span>(arr, low, high);
+        <span class="fn">quickSort</span>(arr, low, pi<span class="op">-</span><span class="nm">1</span>);
+        <span class="fn">quickSort</span>(arr, pi<span class="op">+</span><span class="nm">1</span>, high);
+    }
+}`,
+    python: `<span class="kw">def</span> <span class="fn">quick_sort</span>(arr):
+    <span class="kw">if</span> <span class="fn">len</span>(arr) <span class="op">&lt;=</span> <span class="nm">1</span>:
+        <span class="kw">return</span> arr
+    pivot <span class="op">=</span> arr[<span class="fn">len</span>(arr)<span class="op">//</span><span class="nm">2</span>]
+    left  <span class="op">=</span> [x <span class="kw">for</span> x <span class="kw">in</span> arr <span class="kw">if</span> x <span class="op">&lt;</span> pivot]
+    mid   <span class="op">=</span> [x <span class="kw">for</span> x <span class="kw">in</span> arr <span class="kw">if</span> x <span class="op">==</span> pivot]
+    right <span class="op">=</span> [x <span class="kw">for</span> x <span class="kw">in</span> arr <span class="kw">if</span> x <span class="op">&gt;</span> pivot]
+    <span class="kw">return</span> <span class="fn">quick_sort</span>(left) <span class="op">+</span> mid <span class="op">+</span> <span class="fn">quick_sort</span>(right)`
+  },
+  bfs: {
+    c: `<span class="cm">// BFS in C</span>
+<span class="kw">#include</span> <span class="st">&lt;stdio.h&gt;</span>
+<span class="kw">#define</span> MAX <span class="nm">100</span>
+
+<span class="kw">int</span> adj[MAX][MAX], visited[MAX], queue[MAX];
+<span class="kw">int</span> front <span class="op">=</span> <span class="nm">0</span>, rear <span class="op">=</span> <span class="nm">0</span>;
+
+<span class="kw">void</span> <span class="fn">bfs</span>(<span class="kw">int</span> start, <span class="kw">int</span> n) {
+    visited[start] <span class="op">=</span> <span class="nm">1</span>;
+    queue[rear<span class="op">++</span>] <span class="op">=</span> start;
+    <span class="kw">while</span> (front <span class="op">&lt;</span> rear) {
+        <span class="kw">int</span> node <span class="op">=</span> queue[front<span class="op">++</span>];
+        printf(<span class="st">"%d "</span>, node);
+        <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>) {
+            <span class="kw">if</span> (adj[node][i] <span class="op">&amp;&amp;</span> <span class="op">!</span>visited[i]) {
+                visited[i] <span class="op">=</span> <span class="nm">1</span>;
+                queue[rear<span class="op">++</span>] <span class="op">=</span> i;
+            }
+        }
+    }
+}`,
+    cpp: `<span class="cm">// BFS in C++</span>
+<span class="kw">#include</span> <span class="st">&lt;queue&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;vector&gt;</span>
+<span class="kw">using namespace</span> std;
+
+<span class="kw">void</span> <span class="fn">bfs</span>(vector<span class="op">&lt;</span>vector<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;&gt;&amp;</span> adj, <span class="kw">int</span> start) {
+    vector<span class="op">&lt;</span><span class="kw">bool</span><span class="op">&gt;</span> visited(adj.size(), <span class="kw">false</span>);
+    queue<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;</span> q;
+    visited[start] <span class="op">=</span> <span class="kw">true</span>;
+    q.push(start);
+    <span class="kw">while</span> (<span class="op">!</span>q.empty()) {
+        <span class="kw">int</span> node <span class="op">=</span> q.front(); q.pop();
+        cout <span class="op">&lt;&lt;</span> node <span class="op">&lt;&lt;</span> <span class="st">" "</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> nb : adj[node])
+            <span class="kw">if</span> (<span class="op">!</span>visited[nb]) { visited[nb]<span class="op">=</span><span class="kw">true</span>; q.push(nb); }
+    }
+}`,
+    python: `<span class="kw">from</span> collections <span class="kw">import</span> deque
+
+<span class="kw">def</span> <span class="fn">bfs</span>(graph, start):
+    visited <span class="op">=</span> <span class="fn">set</span>()
+    queue   <span class="op">=</span> <span class="fn">deque</span>([start])
+    visited.add(start)
+    order   <span class="op">=</span> []
+    <span class="kw">while</span> queue:
+        node <span class="op">=</span> queue.popleft()
+        order.append(node)
+        <span class="kw">for</span> nb <span class="kw">in</span> graph[node]:
+            <span class="kw">if</span> nb <span class="kw">not in</span> visited:
+                visited.add(nb)
+                queue.append(nb)
+    <span class="kw">return</span> order`
+  },
+  dfs: {
+    c: `<span class="cm">// DFS in C (Recursive)</span>
+<span class="kw">#define</span> MAX <span class="nm">100</span>
+<span class="kw">int</span> adj[MAX][MAX], visited[MAX];
+
+<span class="kw">void</span> <span class="fn">dfs</span>(<span class="kw">int</span> node, <span class="kw">int</span> n) {
+    visited[node] <span class="op">=</span> <span class="nm">1</span>;
+    printf(<span class="st">"%d "</span>, node);
+    <span class="kw">for</span> (<span class="kw">int</span> i <span class="op">=</span> <span class="nm">0</span>; i <span class="op">&lt;</span> n; i<span class="op">++</span>)
+        <span class="kw">if</span> (adj[node][i] <span class="op">&amp;&amp;</span> <span class="op">!</span>visited[i])
+            <span class="fn">dfs</span>(i, n);
+}`,
+    cpp: `<span class="cm">// DFS in C++ (Recursive)</span>
+<span class="kw">void</span> <span class="fn">dfs</span>(vector<span class="op">&lt;</span>vector<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;&gt;&amp;</span> adj,
+         vector<span class="op">&lt;</span><span class="kw">bool</span><span class="op">&gt;&amp;</span> visited, <span class="kw">int</span> node) {
+    visited[node] <span class="op">=</span> <span class="kw">true</span>;
+    cout <span class="op">&lt;&lt;</span> node <span class="op">&lt;&lt;</span> <span class="st">" "</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> nb : adj[node])
+        <span class="kw">if</span> (<span class="op">!</span>visited[nb])
+            <span class="fn">dfs</span>(adj, visited, nb);
+}`,
+    python: `<span class="kw">def</span> <span class="fn">dfs</span>(graph, start, visited<span class="op">=</span><span class="kw">None</span>):
+    <span class="kw">if</span> visited <span class="kw">is None</span>:
+        visited <span class="op">=</span> <span class="fn">set</span>()
+    visited.add(start)
+    <span class="kw">print</span>(start, end<span class="op">=</span><span class="st">' '</span>)
+    <span class="kw">for</span> nb <span class="kw">in</span> graph[start]:
+        <span class="kw">if</span> nb <span class="kw">not in</span> visited:
+            <span class="fn">dfs</span>(graph, nb, visited)
+    <span class="kw">return</span> visited`
+  },
+  insert_end: {
+    c: `<span class="cm">// Linked List Insert at End (C)</span>
+<span class="kw">struct</span> Node {
+    <span class="kw">int</span> data;
+    <span class="kw">struct</span> Node<span class="op">*</span> next;
+};
+
+<span class="kw">void</span> <span class="fn">insertEnd</span>(<span class="kw">struct</span> Node<span class="op">**</span> head, <span class="kw">int</span> val) {
+    <span class="kw">struct</span> Node<span class="op">*</span> newNode <span class="op">=</span>
+        (<span class="kw">struct</span> Node<span class="op">*</span>)<span class="fn">malloc</span>(<span class="kw">sizeof</span>(<span class="kw">struct</span> Node));
+    newNode<span class="op">-&gt;</span>data <span class="op">=</span> val;
+    newNode<span class="op">-&gt;</span>next <span class="op">=</span> NULL;
+    <span class="kw">if</span> (<span class="op">*</span>head <span class="op">==</span> NULL) { <span class="op">*</span>head <span class="op">=</span> newNode; <span class="kw">return</span>; }
+    <span class="kw">struct</span> Node<span class="op">*</span> temp <span class="op">=</span> <span class="op">*</span>head;
+    <span class="kw">while</span> (temp<span class="op">-&gt;</span>next <span class="op">!=</span> NULL) temp <span class="op">=</span> temp<span class="op">-&gt;</span>next;
+    temp<span class="op">-&gt;</span>next <span class="op">=</span> newNode;
+}`,
+    cpp: `<span class="cm">// Linked List Insert at End (C++)</span>
+<span class="kw">struct</span> Node {
+    <span class="kw">int</span> data;
+    Node<span class="op">*</span> next;
+    Node(<span class="kw">int</span> val) : data(val), next(<span class="kw">nullptr</span>) {}
+};
+
+<span class="kw">void</span> <span class="fn">insertEnd</span>(Node<span class="op">*&amp;</span> head, <span class="kw">int</span> val) {
+    Node<span class="op">*</span> newNode <span class="op">=</span> <span class="kw">new</span> Node(val);
+    <span class="kw">if</span> (<span class="op">!</span>head) { head <span class="op">=</span> newNode; <span class="kw">return</span>; }
+    Node<span class="op">*</span> temp <span class="op">=</span> head;
+    <span class="kw">while</span> (temp<span class="op">-&gt;</span>next) temp <span class="op">=</span> temp<span class="op">-&gt;</span>next;
+    temp<span class="op">-&gt;</span>next <span class="op">=</span> newNode;
+}`,
+    python: `<span class="kw">class</span> <span class="fn">Node</span>:
+    <span class="kw">def</span> <span class="fn">__init__</span>(self, val):
+        self.data <span class="op">=</span> val
+        self.next <span class="op">=</span> <span class="kw">None</span>
+
+<span class="kw">def</span> <span class="fn">insert_end</span>(head, val):
+    new_node <span class="op">=</span> Node(val)
+    <span class="kw">if not</span> head:
+        <span class="kw">return</span> new_node
+    temp <span class="op">=</span> head
+    <span class="kw">while</span> temp.next:
+        temp <span class="op">=</span> temp.next
+    temp.next <span class="op">=</span> new_node
+    <span class="kw">return</span> head`
+  },
+  push: {
+    c: `<span class="cm">// Stack using Array (C)</span>
+<span class="kw">#define</span> MAX <span class="nm">100</span>
+<span class="kw">int</span> stack[MAX], top <span class="op">=</span> <span class="nm">-1</span>;
+
+<span class="kw">void</span> <span class="fn">push</span>(<span class="kw">int</span> val) {
+    <span class="kw">if</span> (top <span class="op">==</span> MAX<span class="op">-</span><span class="nm">1</span>) { printf(<span class="st">"Overflow!\n"</span>); <span class="kw">return</span>; }
+    stack[<span class="op">++</span>top] <span class="op">=</span> val;
+}
+
+<span class="kw">int</span> <span class="fn">pop</span>() {
+    <span class="kw">if</span> (top <span class="op">==</span> <span class="nm">-1</span>) { printf(<span class="st">"Underflow!\n"</span>); <span class="kw">return</span> <span class="nm">-1</span>; }
+    <span class="kw">return</span> stack[top<span class="op">--</span>];
+}
+
+<span class="kw">int</span> <span class="fn">peek</span>() {
+    <span class="kw">if</span> (top <span class="op">==</span> <span class="nm">-1</span>) <span class="kw">return</span> <span class="nm">-1</span>;
+    <span class="kw">return</span> stack[top];
+}`,
+    cpp: `<span class="cm">// Stack using STL (C++)</span>
+<span class="kw">#include</span> <span class="st">&lt;stack&gt;</span>
+<span class="kw">using namespace</span> std;
+
+stack<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;</span> st;
+
+<span class="kw">void</span> <span class="fn">push</span>(<span class="kw">int</span> val) { st.push(val); }
+
+<span class="kw">int</span> <span class="fn">pop</span>() {
+    <span class="kw">int</span> val <span class="op">=</span> st.top();
+    st.pop();
+    <span class="kw">return</span> val;
+}
+
+<span class="kw">int</span> <span class="fn">peek</span>() { <span class="kw">return</span> st.top(); }`,
+    python: `<span class="cm"># Stack in Python (using list)</span>
+stack <span class="op">=</span> []
+
+<span class="kw">def</span> <span class="fn">push</span>(val):
+    stack.append(val)
+
+<span class="kw">def</span> <span class="fn">pop</span>():
+    <span class="kw">if not</span> stack:
+        <span class="kw">print</span>(<span class="st">"Underflow!"</span>)
+        <span class="kw">return None</span>
+    <span class="kw">return</span> stack.pop()
+
+<span class="kw">def</span> <span class="fn">peek</span>():
+    <span class="kw">return</span> stack[<span class="op">-</span><span class="nm">1</span>] <span class="kw">if</span> stack <span class="kw">else None</span>`
+  },
+  enqueue: {
+    c: `<span class="cm">// Queue using Array (C)</span>
+<span class="kw">#define</span> MAX <span class="nm">100</span>
+<span class="kw">int</span> queue[MAX], front <span class="op">=</span> <span class="nm">0</span>, rear <span class="op">=</span> <span class="nm">0</span>;
+
+<span class="kw">void</span> <span class="fn">enqueue</span>(<span class="kw">int</span> val) {
+    <span class="kw">if</span> (rear <span class="op">==</span> MAX) { printf(<span class="st">"Overflow!\n"</span>); <span class="kw">return</span>; }
+    queue[rear<span class="op">++</span>] <span class="op">=</span> val;
+}
+
+<span class="kw">int</span> <span class="fn">dequeue</span>() {
+    <span class="kw">if</span> (front <span class="op">==</span> rear) { printf(<span class="st">"Underflow!\n"</span>); <span class="kw">return</span> <span class="nm">-1</span>; }
+    <span class="kw">return</span> queue[front<span class="op">++</span>];
+}`,
+    cpp: `<span class="cm">// Queue using STL (C++)</span>
+<span class="kw">#include</span> <span class="st">&lt;queue&gt;</span>
+<span class="kw">using namespace</span> std;
+
+queue<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;</span> q;
+
+<span class="kw">void</span> <span class="fn">enqueue</span>(<span class="kw">int</span> val) { q.push(val); }
+
+<span class="kw">int</span> <span class="fn">dequeue</span>() {
+    <span class="kw">int</span> val <span class="op">=</span> q.front();
+    q.pop();
+    <span class="kw">return</span> val;
+}`,
+    python: `<span class="cm"># Queue in Python</span>
+<span class="kw">from</span> collections <span class="kw">import</span> deque
+queue <span class="op">=</span> <span class="fn">deque</span>()
+
+<span class="kw">def</span> <span class="fn">enqueue</span>(val):
+    queue.append(val)      <span class="cm"># add to rear</span>
+
+<span class="kw">def</span> <span class="fn">dequeue</span>():
+    <span class="kw">if not</span> queue:
+        <span class="kw">print</span>(<span class="st">"Underflow!"</span>)
+        <span class="kw">return None</span>
+    <span class="kw">return</span> queue.popleft()  <span class="cm"># remove from front</span>`
+  },
+  binary: {
+    c: `<span class="cm">// Binary Search in C</span>
+<span class="kw">int</span> <span class="fn">binarySearch</span>(<span class="kw">int</span> arr[], <span class="kw">int</span> n, <span class="kw">int</span> target) {
+    <span class="kw">int</span> left <span class="op">=</span> <span class="nm">0</span>, right <span class="op">=</span> n <span class="op">-</span> <span class="nm">1</span>;
+    <span class="kw">while</span> (left <span class="op">&lt;=</span> right) {
+        <span class="kw">int</span> mid <span class="op">=</span> left <span class="op">+</span> (right <span class="op">-</span> left) <span class="op">/</span> <span class="nm">2</span>;
+        <span class="kw">if</span> (arr[mid] <span class="op">==</span> target) <span class="kw">return</span> mid;
+        <span class="kw">if</span> (arr[mid] <span class="op">&lt;</span> target)  left  <span class="op">=</span> mid <span class="op">+</span> <span class="nm">1</span>;
+        <span class="kw">else</span>                      right <span class="op">=</span> mid <span class="op">-</span> <span class="nm">1</span>;
+    }
+    <span class="kw">return</span> <span class="nm">-1</span>; <span class="cm">// Not found</span>
+}`,
+    cpp: `<span class="cm">// Binary Search in C++</span>
+<span class="kw">int</span> <span class="fn">binarySearch</span>(vector<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;&amp;</span> arr, <span class="kw">int</span> target) {
+    <span class="kw">int</span> left <span class="op">=</span> <span class="nm">0</span>, right <span class="op">=</span> arr.size() <span class="op">-</span> <span class="nm">1</span>;
+    <span class="kw">while</span> (left <span class="op">&lt;=</span> right) {
+        <span class="kw">int</span> mid <span class="op">=</span> left <span class="op">+</span> (right <span class="op">-</span> left) <span class="op">/</span> <span class="nm">2</span>;
+        <span class="kw">if</span> (arr[mid] <span class="op">==</span> target) <span class="kw">return</span> mid;
+        arr[mid] <span class="op">&lt;</span> target ? left <span class="op">=</span> mid<span class="op">+</span><span class="nm">1</span> : right <span class="op">=</span> mid<span class="op">-</span><span class="nm">1</span>;
+    }
+    <span class="kw">return</span> <span class="nm">-1</span>;
+}`,
+    python: `<span class="kw">def</span> <span class="fn">binary_search</span>(arr, target):
+    left, right <span class="op">=</span> <span class="nm">0</span>, <span class="fn">len</span>(arr) <span class="op">-</span> <span class="nm">1</span>
+    <span class="kw">while</span> left <span class="op">&lt;=</span> right:
+        mid <span class="op">=</span> (left <span class="op">+</span> right) <span class="op">//</span> <span class="nm">2</span>
+        <span class="kw">if</span>   arr[mid] <span class="op">==</span> target: <span class="kw">return</span> mid
+        <span class="kw">elif</span> arr[mid] <span class="op">&lt;</span>  target: left  <span class="op">=</span> mid <span class="op">+</span> <span class="nm">1</span>
+        <span class="kw">else</span>:                     right <span class="op">=</span> mid <span class="op">-</span> <span class="nm">1</span>
+    <span class="kw">return</span> <span class="nm">-1</span>  <span class="cm"># Not found</span>`
+  },
+  dijkstra: {
+    c: `<span class="cm">// Dijkstra in C (adjacency matrix)</span>
+<span class="kw">#define</span> INF <span class="nm">99999</span>
+<span class="kw">#define</span> V   <span class="nm">5</span>
+
+<span class="kw">void</span> <span class="fn">dijkstra</span>(<span class="kw">int</span> graph[V][V], <span class="kw">int</span> src) {
+    <span class="kw">int</span> dist[V], visited[V] <span class="op">=</span> {<span class="nm">0</span>};
+    <span class="kw">for</span> (<span class="kw">int</span> i<span class="op">=</span><span class="nm">0</span>; i<span class="op">&lt;</span>V; i<span class="op">++</span>) dist[i] <span class="op">=</span> INF;
+    dist[src] <span class="op">=</span> <span class="nm">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i<span class="op">=</span><span class="nm">0</span>; i<span class="op">&lt;</span>V<span class="op">-</span><span class="nm">1</span>; i<span class="op">++</span>) {
+        <span class="kw">int</span> u <span class="op">=</span> <span class="fn">minDist</span>(dist, visited);
+        visited[u] <span class="op">=</span> <span class="nm">1</span>;
+        <span class="kw">for</span> (<span class="kw">int</span> v<span class="op">=</span><span class="nm">0</span>; v<span class="op">&lt;</span>V; v<span class="op">++</span>)
+            <span class="kw">if</span> (!visited[v] <span class="op">&amp;&amp;</span> graph[u][v]
+                <span class="op">&amp;&amp;</span> dist[u]<span class="op">+</span>graph[u][v] <span class="op">&lt;</span> dist[v])
+                dist[v] <span class="op">=</span> dist[u] <span class="op">+</span> graph[u][v];
+    }
+}`,
+    cpp: `<span class="cm">// Dijkstra in C++ (priority queue)</span>
+<span class="kw">#include</span> <span class="st">&lt;queue&gt;</span>
+<span class="kw">#include</span> <span class="st">&lt;vector&gt;</span>
+<span class="kw">using namespace</span> std;
+<span class="kw">typedef</span> pair<span class="op">&lt;</span><span class="kw">int</span>,<span class="kw">int</span><span class="op">&gt;</span> pii;
+
+vector<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;</span> <span class="fn">dijkstra</span>(vector<span class="op">&lt;</span>vector<span class="op">&lt;</span>pii<span class="op">&gt;&gt;&amp;</span> adj, <span class="kw">int</span> src) {
+    <span class="kw">int</span> n <span class="op">=</span> adj.size();
+    vector<span class="op">&lt;</span><span class="kw">int</span><span class="op">&gt;</span> dist(n, INT_MAX);
+    priority_queue<span class="op">&lt;</span>pii, vector<span class="op">&lt;</span>pii<span class="op">&gt;</span>, greater<span class="op">&lt;</span>pii<span class="op">&gt;&gt;</span> pq;
+    dist[src] <span class="op">=</span> <span class="nm">0</span>; pq.push({<span class="nm">0</span>, src});
+    <span class="kw">while</span> (<span class="op">!</span>pq.empty()) {
+        <span class="kw">auto</span> [d, u] <span class="op">=</span> pq.top(); pq.pop();
+        <span class="kw">if</span> (d <span class="op">&gt;</span> dist[u]) <span class="kw">continue</span>;
+        <span class="kw">for</span> (<span class="kw">auto</span> [v, w] : adj[u])
+            <span class="kw">if</span> (dist[u]<span class="op">+</span>w <span class="op">&lt;</span> dist[v])
+                pq.push({dist[v]<span class="op">=</span>dist[u]<span class="op">+</span>w, v});
+    }
+    <span class="kw">return</span> dist;
+}`,
+    python: `<span class="kw">import</span> heapq
+
+<span class="kw">def</span> <span class="fn">dijkstra</span>(graph, start):
+    dist <span class="op">=</span> {node: <span class="fn">float</span>(<span class="st">'inf'</span>) <span class="kw">for</span> node <span class="kw">in</span> graph}
+    dist[start] <span class="op">=</span> <span class="nm">0</span>
+    pq <span class="op">=</span> [(0, start)]
+    <span class="kw">while</span> pq:
+        d, u <span class="op">=</span> heapq.heappop(pq)
+        <span class="kw">if</span> d <span class="op">&gt;</span> dist[u]: <span class="kw">continue</span>
+        <span class="kw">for</span> v, w <span class="kw">in</span> graph[u]:
+            <span class="kw">if</span> dist[u] <span class="op">+</span> w <span class="op">&lt;</span> dist[v]:
+                dist[v] <span class="op">=</span> dist[u] <span class="op">+</span> w
+                heapq.heappush(pq, (dist[v], v))
+    <span class="kw">return</span> dist`
+  }
+};
+
+function switchLang(lang) {
+  currentLang = lang;
+  document.querySelectorAll('.code-lang-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`btn-lang-${lang}`).classList.add('active');
+  showCode(currentAlgo);
+}
+
+function showCode(algoId) {
+  const block = document.getElementById('code-block');
+  const codeMap = CODE[algoId] || CODE['bubble'];
+  const code = codeMap[currentLang] || codeMap['c'] || 'Code not available';
+  block.innerHTML = code;
+}
+
+function copyCode() {
+  const block = document.getElementById('code-block');
+  const text = block.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.code-copy-btn');
+    btn.textContent = '✅ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  });
+}
+
+// ═══════════════════════════════════════════
+// START
+// ═══════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
